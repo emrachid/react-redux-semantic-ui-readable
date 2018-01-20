@@ -1,12 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Header, Grid, Dropdown, Button, Divider } from 'semantic-ui-react'
+import { Grid, Dropdown, Button, Divider } from 'semantic-ui-react'
 
-const CategoryHeader = ({ title, onSelect, options, defaultValue }) => (
+const CategoryHeader = ({ title, onSelect, options, defaultValue, className }) => (
   <div>
+    <Divider hidden section/>
     <Grid stackable columns={3}>
        <Grid.Column width={2}>
-         <Header as="h2">{title}</Header>
+         <h2 className={className}>{title}</h2>
        </Grid.Column>
        <Grid.Column width={3}>
          <Button color={"grey"} basic circular compact size={"tiny"}>
@@ -21,7 +22,7 @@ const CategoryHeader = ({ title, onSelect, options, defaultValue }) => (
          />
        </Grid.Column>
     </Grid>
-    <Divider/>
+    <Divider />
   </div>
 );
 

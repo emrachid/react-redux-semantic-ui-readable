@@ -1,48 +1,28 @@
 import React, { Component } from 'react';
-import { Container, Divider } from 'semantic-ui-react';
+import { Container } from 'semantic-ui-react';
 import CategoryHeader from './CategoryHeader'
 import CategoryItem from './CategoryItem'
 import '../App.css';
 
+import * as ServerAPI from '../utils/ServerAPI'
 
 class App extends Component {
+  componentDidMount() {
+  	ServerAPI.getCategories().then((categories) => {
+      //console.log(categories);
+  		this.setState({ categories });
+    });
+
+    ServerAPI.getPosts().then((posts) => {
+      //console.log(posts);
+      this.setState({ posts });
+    });
+  }
+
   state = {
     sortByValue: 'n',
-    posts: [
-      {
-        title: 'Life is good',
-        category: 'React',
-        description: 'Everyone says so after all. ' +
-          'Amy is a violinist with 2 years experience in the wedding industry. ' +
-          'She enjoys the outdoors and currently resides in upstate New York. ',
-        author: 'Euler Rachid',
-        timestamp: 1316416373686,
-        votes: 0,
-        comments: 0,
-      },
-      {
-        title: 'Udacity is the best place to learn React',
-        category: 'React',
-        description: 'Everyone says so after all. ' +
-          'Amy is a violinist with 2 years experience in the wedding industry. ' +
-          'She enjoys the outdoors and currently resides in upstate New York. ',
-        author: 'Euler Rachid',
-        timestamp: 1416416373686,
-        votes: 6,
-        comments: 2,
-      },
-      {
-        title: 'Immigrate to Canada',
-        category: 'React',
-        description: 'Everyone says so after all. ' +
-          'Amy is a violinist with 2 years experience in the wedding industry. ' +
-          'She enjoys the outdoors and currently resides in upstate New York. ',
-        author: 'Euler Rachid',
-        timestamp: 1516416373686,
-        votes: 4,
-        comments: 2,
-      },
-    ],
+    categories: [],
+    posts: [],
   };
 
   render() {
@@ -66,34 +46,39 @@ class App extends Component {
         </div>
 
         <Container>
-          <Divider hidden />
-          <CategoryHeader
-            title={'React'}
-            onSelect={onSortByClick}
-            options={sortByOptions}
-            defaultValue={this.state.sortByValue}
-          />
-          {this.state.posts
-            .filter((postItem) => (postItem.category === 'React'))
-            .sort((postA, postB) => {
-              switch (this.state.sortByValue) {
-                default:
-                case 'n':
-                  return postB.timestamp - postA.timestamp;
-                case 'v':
-                  return postB.votes - postA.votes;
-              }
-            })
-            .map((postItem, index) => (
-            <CategoryItem
-              id={index}
-              title={postItem.title}
-              description={postItem.description}
-              author={postItem.author}
-              timestamp={postItem.timestamp}
-              votes={postItem.votes}
-              comments={postItem.comments}
-            />
+          {this.state.categories.map(category => (
+            <div>
+              <CategoryHeader
+                className="category-header"
+                title={category.name}
+                onSelect={onSortByClick}
+                options={sortByOptions}
+                defaultValue={this.state.sortByValue}
+              />
+              {this.state.posts
+                .filter((postItem) => (postItem.category === category.name))
+                .sort((postA, postB) => {
+                  switch (this.state.sortByValue) {
+                    default:
+                    case 'n':
+                      return postB.timestamp - postA.timestamp;
+                    case 'v':
+                      return postB.voteScore - postA.voteScore;
+                  }
+                })
+                .map((postItem, index) => (
+                  <CategoryItem
+                    key={postItem.id}
+                    id={postItem.id}
+                    title={postItem.title}
+                    description={postItem.body}
+                    author={postItem.author}
+                    timestamp={postItem.timestamp}
+                    votes={postItem.voteScore}
+                    comments={postItem.commentCount}
+                  />
+              ))}
+            </div>
           ))}
         </Container>
 
