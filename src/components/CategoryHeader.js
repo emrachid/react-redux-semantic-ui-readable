@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { Link } from 'react-router-dom'
 import { Grid, Dropdown, Button, Divider } from 'semantic-ui-react'
 
 const CategoryHeader = ({ title, onSelect, options, defaultValue, className }) => (
@@ -7,7 +8,10 @@ const CategoryHeader = ({ title, onSelect, options, defaultValue, className }) =
     <Divider hidden section/>
     <Grid stackable columns={3}>
        <Grid.Column width={2}>
-         <h2 className={className}>{title}</h2>
+         <Link to={{
+           pathname: '/category',
+           search: ('?title=' + title)
+         }}><h2 className={className}>{title}</h2></Link>
        </Grid.Column>
        <Grid.Column width={3}>
          <Button color={"grey"} basic circular compact size={"tiny"}>

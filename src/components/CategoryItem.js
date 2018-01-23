@@ -12,7 +12,7 @@ const CategoryItem = ({ postItem, onVote }) => (
           <Item.Meta>
             <span>{dateFromTime(postItem.timestamp)}</span>
           </Item.Meta>
-          <Item.Description>{postItem.description}</Item.Description>
+          <Item.Description>{postItem.body}</Item.Description>
           <Item.Extra>
             <Grid stackable columns={4} verticalAlign={'bottom'}>
               <Grid.Column>
