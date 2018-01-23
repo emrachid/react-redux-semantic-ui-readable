@@ -19,6 +19,16 @@ class App extends Component {
     });
   }
 
+  onVote = (id, isLike) => {
+    ServerAPI.votePost(id, isLike).then((newPost) => {
+      this.setState((prevState) => ({
+        posts: prevState.posts.filter((post) => (
+          post.id !== newPost.id)).concat([ newPost ]
+        )
+      }))
+    });
+  }
+
   state = {
     sortByValue: 'n',
     categories: [],
@@ -46,8 +56,8 @@ class App extends Component {
         </div>
 
         <Container>
-          {this.state.categories.map(category => (
-            <div>
+          {this.state.categories.map((category, index) => (
+            <div key={index}>
               <CategoryHeader
                 className="category-header"
                 title={category.name}
@@ -68,14 +78,9 @@ class App extends Component {
                 })
                 .map((postItem, index) => (
                   <CategoryItem
-                    key={postItem.id}
-                    id={postItem.id}
-                    title={postItem.title}
-                    description={postItem.body}
-                    author={postItem.author}
-                    timestamp={postItem.timestamp}
-                    votes={postItem.voteScore}
-                    comments={postItem.commentCount}
+                    key={index}
+                    postItem={postItem}
+                    onVote={this.onVote}
                   />
               ))}
             </div>

@@ -29,7 +29,7 @@ if (!token)
 
 const headers = {
   'Accept': 'application/json',
-  'Authorization': token
+  'Authorization': token,
 };
 
 export const getCategories = () =>
@@ -50,9 +50,9 @@ export const addPost = (post) =>
     method: 'POST',
     headers: {
       ...headers,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(post)
+    body: JSON.stringify(post),
   }).then(res => res.json());
 
 export const getPost = (id) =>
@@ -64,11 +64,11 @@ export const votePost = (id, isLike) =>
     method: 'POST',
     headers: {
       ...headers,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: {
-      'option': (isLike ? 'upVote' : 'downVote')
-    }
+    body: JSON.stringify({
+      'option': (isLike ? 'upVote' : 'downVote'),
+    }),
   }).then(res => res.json());
 
 export const updatePost = (id, title, body) =>
@@ -78,10 +78,10 @@ export const updatePost = (id, title, body) =>
       ...headers,
       'Content-Type': 'application/json'
     },
-    body: {
+    body: JSON.stringify({
       'title': title,
-      'body': body
-    }
+      'body': body,
+    }),
   }).then(res => res.json());
 
 export const deletePost = (id) =>
@@ -97,9 +97,9 @@ export const addPostComment = (comment) =>
     method: 'POST',
     headers: {
       ...headers,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(comment)
+    body: JSON.stringify(comment),
   }).then(res => res.json());
 
 export const getComment = (id) =>
@@ -111,11 +111,11 @@ export const voteComment = (id, isLike) =>
     method: 'POST',
     headers: {
       ...headers,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: {
-      'option': (isLike ? 'upVote' : 'downVote')
-    }
+    body: JSON.stringify({
+      'option': (isLike ? 'upVote' : 'downVote'),
+    }),
   }).then(res => res.json());
 
 export const updateComment = (id, timestamp, body) =>
@@ -123,12 +123,12 @@ export const updateComment = (id, timestamp, body) =>
     method: 'PUT',
     headers: {
       ...headers,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: {
+    body: JSON.stringify({
       'timestamp': timestamp,
-      'body': body
-    }
+      'body': body,
+    }),
   }).then(res => res.json());
 
 export const deleteComment = (id) =>
