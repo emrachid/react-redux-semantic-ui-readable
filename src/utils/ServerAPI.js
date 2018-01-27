@@ -20,6 +20,8 @@ Serve implementation can be found in Github:
 
 */
 
+import UUIDjs from 'uuid-js';
+
 const api = process.env.SERVER_API_URL || 'http://localhost:3001';
 
 let token = localStorage.token;
@@ -52,7 +54,11 @@ export const addPost = (post) =>
       ...headers,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(post),
+    body: JSON.stringify({
+      ...post,
+      'timestamp': Date.now(),
+      'id': UUIDjs.create().toString(),
+    }),
   }).then(res => res.json());
 
 export const getPost = (id) =>
@@ -99,7 +105,11 @@ export const addPostComment = (comment) =>
       ...headers,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(comment),
+    body: JSON.stringify({
+      ...comment,
+      'timestamp': Date.now(),
+      'id': UUIDjs.create().toString(),
+    }),
   }).then(res => res.json());
 
 export const getComment = (id) =>
@@ -118,7 +128,7 @@ export const voteComment = (id, isLike) =>
     }),
   }).then(res => res.json());
 
-export const updateComment = (id, timestamp, body) =>
+export const updateComment = (id, body) =>
   fetch(`${api}/comments/${id}`, {
     method: 'PUT',
     headers: {
@@ -126,7 +136,7 @@ export const updateComment = (id, timestamp, body) =>
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      'timestamp': timestamp,
+      'timestamp': Date.now(),
       'body': body,
     }),
   }).then(res => res.json());

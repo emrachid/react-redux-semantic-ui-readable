@@ -1,14 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types'
-import { Icon, Grid, Divider, Button, Item } from 'semantic-ui-react'
+import { Link } from 'react-router-dom'
+import { Icon, Grid, Divider, Item } from 'semantic-ui-react'
 import dateFromTime from '../utils/ConvertTimeToDate'
+import history from '../utils/history'
 
-const CategoryItem = ({ postItem, onVote }) => (
+const CategoryItem = ({ postItem, onVote, detailedView, onDelete }) => (
   <div>
     <Item.Group divided>
       <Item>
         <Item.Content>
-          <Item.Header as="a">{postItem.title}</Item.Header>
+          <Item.Header>{postItem.title}</Item.Header>
           <Item.Meta>
             <span>{dateFromTime(postItem.timestamp)}</span>
           </Item.Meta>
@@ -23,19 +25,35 @@ const CategoryItem = ({ postItem, onVote }) => (
                   <span className="category-votes">Votes {postItem.voteScore}</span>
                   <Icon name="thumbs up"
                     link
-                    onClick={() => onVote(postItem.id,true)}/>
+                    onClick={() => onVote(postItem.id, true)}/>
                   <Icon name="thumbs down"
                     link
                     onClick={() => onVote(postItem.id, false)}
                     flipped={'horizontally'}/>
               </Grid.Column>
               <Grid.Column>
-                <Icon name="comments"/> Comments {postItem.comments}
+                <Icon name="comments"/> Comments {postItem.commentCount}
               </Grid.Column>
               <Grid.Column>
-                <Button color={'grey'} basic circular compact  size={'tiny'}>
-                  View
-                </Button>
+                {detailedView ? (
+                  <div>
+                    <Link to={{
+                      pathname: '/editpost',
+                      search: ('?id=' + postItem.id)
+                    }}><Icon name="edit"/> Edit </Link>
+                    |
+                    <a href="/" onClick={(e) => {
+                      onDelete(postItem.id);
+                      // Prevent user going back to a deleted post
+                      history.replace('/');
+                    }}> Delete</a>
+                  </div>
+                ):(
+                  <Link to={{
+                    pathname: '/post',
+                    search: ('?id=' + postItem.id)
+                  }}><Icon name="talk"/> View <Icon name="angle right"/></Link>
+                )}
               </Grid.Column>
             </Grid>
           </Item.Extra>

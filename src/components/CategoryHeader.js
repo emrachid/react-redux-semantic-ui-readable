@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-import { Grid, Dropdown, Button, Divider } from 'semantic-ui-react'
+import { Grid, Dropdown, Divider } from 'semantic-ui-react'
 
 const CategoryHeader = ({ title, onSelect, options, defaultValue, className }) => (
   <div>
@@ -14,9 +14,9 @@ const CategoryHeader = ({ title, onSelect, options, defaultValue, className }) =
          }}><h2 className={className}>{title}</h2></Link>
        </Grid.Column>
        <Grid.Column width={3}>
-         <Button color={"grey"} basic circular compact size={"tiny"}>
+         <Link to={'/newpost?category=' + title}>
            Add new post
-         </Button>
+         </Link>
        </Grid.Column>
        <Grid.Column width={2} verticalAlign={"bottom"} floated={"right"}>
          <Dropdown

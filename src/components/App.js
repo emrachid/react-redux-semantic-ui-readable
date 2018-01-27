@@ -3,6 +3,10 @@ import { Container, Icon } from 'semantic-ui-react';
 import { Route, Link } from 'react-router-dom'
 import CategoryHeader from './CategoryHeader'
 import CategoryItem from './CategoryItem'
+import PostView from './PostView'
+import PostForm from './PostForm'
+import history from '../utils/history'
+import { removeItemFromArray } from '../utils/ArrayHelper.js'
 import '../App.css';
 
 import * as ServerAPI from '../utils/ServerAPI'
@@ -10,24 +14,63 @@ import * as ServerAPI from '../utils/ServerAPI'
 class App extends Component {
   componentDidMount() {
   	ServerAPI.getCategories().then((categories) => {
-      //console.log(categories);
   		this.setState({ categories });
     });
 
     ServerAPI.getPosts().then((posts) => {
-      //console.log(posts);
       this.setState({ posts });
+    });
+  }
+
+  onDeletePost = (id) => {
+    ServerAPI.deletePost(id).then((removedPost) => {
+      this.setState((prevState) => ({
+        posts: removeItemFromArray(prevState.posts, removedPost.id)
+      }));
     });
   }
 
   onVote = (id, isLike) => {
     ServerAPI.votePost(id, isLike).then((newPost) => {
       this.setState((prevState) => ({
-        posts: prevState.posts.filter((post) => (
-          post.id !== newPost.id)).concat([ newPost ]
-        )
-      }))
+        posts: removeItemFromArray(prevState.posts, newPost.id)
+          .concat([ newPost ])
+      }));
     });
+  }
+
+  handleAddUpdatePost = (values, category) => {
+    /* if form id is not empty, it is an update command.
+     * Otherwise, it is an add command.
+     */
+    if (values.formId) {
+      ServerAPI.updatePost(values.formId, values.formTitle, values.formBody)
+        .then((newPost) => {
+          this.setState((prevState) => ({
+            comments: removeItemFromArray(prevState.posts, newPost.id)
+              .concat([ newPost ])
+          }));
+        });
+    } else {
+      const postToAdd = {
+        body: values.formBody,
+        author: values.formAuthor,
+        title: values.formTitle,
+        category: category,
+      };
+
+      ServerAPI.addPost(postToAdd)
+        .then((newPost) => {
+          this.setState((prevState) => ({
+            post: removeItemFromArray(prevState.posts, newPost.id)
+              .concat([ newPost ]),
+          }));
+        });
+
+    }
+    // Avoid user going back to form because the form state will be invalid.
+    history.replace('/')
+    history.goBack();
   }
 
   state = {
@@ -38,7 +81,6 @@ class App extends Component {
 
   render() {
     const onSortByClick = (e, data) => {
-      console.log(data.value);
       if (this.state.sortByValue !== data.value) {
         this.setState({ sortByValue: data.value });
       }
@@ -86,6 +128,12 @@ class App extends Component {
       </Container>
     );
 
+    const getValue = (key, query) => (
+      // Check whether query is valid. If so, get value from query.
+      (query.indexOf(`?${key}=`) === 0) ?
+        query.slice(`?${key}=`.length) : ''
+    );
+
     return (
       <div>
         <div className = "app-header">
@@ -93,15 +141,33 @@ class App extends Component {
           <h4>Read, post, comment and vote. Share your ideas to the world.</h4>
         </div>
 
-        <Route exact path="/" render={() => body("")}/>
-        <Route path="/category" render={({ location })=>{
-          const titleQuery = location.search;
-          // Check whether query is valid. If so, get title from query.
-          const title = (titleQuery.indexOf("?title=") === 0) ?
-            titleQuery.slice("?title=".length) : "";
-          return body(title);
-        }}/>
-
+        <Route exact path="/" render={() => body('')}/>
+        <Route path="/category" render={({ location }) => (
+          body(getValue('title', location.search))
+        )}/>
+        <Route path="/post" render={({ location }) => (
+          <PostView
+            postId={getValue('id', location.search)}
+            onVote={this.onVote}
+            onDelete={this.onDeletePost}
+          />
+        )}/>
+        <Route path="/editpost" render={({ location }) => (
+          <PostForm
+            onSubmit={this.handleAddUpdatePost}
+            showTitle={true}
+            values={this.state.posts.find((post) => (
+              post.id === getValue('id', location.search)
+            ))}
+          />
+        )}/>
+        <Route path="/newpost" render={({ location }) => (
+          <PostForm
+            onSubmit={this.handleAddUpdatePost}
+            showTitle={true}
+            category={getValue('category', location.search)}
+          />
+        )}/>
       </div>
     );
   }
