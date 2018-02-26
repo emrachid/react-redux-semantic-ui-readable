@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { Container, Icon } from 'semantic-ui-react';
-import { Route, Link } from 'react-router-dom'
-import CategoryHeader from './CategoryHeader'
-import CategoryItem from './CategoryItem'
-import PostView from './PostView'
-import PostForm from './PostForm'
-import history from '../utils/history'
-import { removeItemFromArray } from '../utils/ArrayHelper.js'
+import { Route, Link } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import CategoryHeader from './CategoryHeader';
+import CategoryItem from './CategoryItem';
+import PostView from './PostView';
+import PostForm from './PostForm';
+import { addPost, deletePost, updatePost, createPosts, createComments } from '../actions';
 import '../App.css';
 
 import * as ServerAPI from '../utils/ServerAPI'
@@ -18,24 +19,18 @@ class App extends Component {
     });
 
     ServerAPI.getPosts().then((posts) => {
-      this.setState({ posts });
-    });
-  }
-
-  onDeletePost = (id) => {
-    ServerAPI.deletePost(id).then((removedPost) => {
-      this.setState((prevState) => ({
-        posts: removeItemFromArray(prevState.posts, removedPost.id)
-      }));
+      this.props.createPosts(posts);
+      posts.forEach((post) => {
+        ServerAPI.getPostComments(post.id).then((comments) => {
+          this.props.createComments(comments);
+        });
+      });
     });
   }
 
   onVote = (id, isLike) => {
     ServerAPI.votePost(id, isLike).then((newPost) => {
-      this.setState((prevState) => ({
-        posts: removeItemFromArray(prevState.posts, newPost.id)
-          .concat([ newPost ])
-      }));
+      this.props.updatePost(newPost);
     });
   }
 
@@ -46,11 +41,9 @@ class App extends Component {
     if (values.formId) {
       ServerAPI.updatePost(values.formId, values.formTitle, values.formBody)
         .then((newPost) => {
-          this.setState((prevState) => ({
-            comments: removeItemFromArray(prevState.posts, newPost.id)
-              .concat([ newPost ])
-          }));
+          this.props.updatePost(newPost);
         });
+      window.location.href='/post?id=' + values.formId;
     } else {
       const postToAdd = {
         body: values.formBody,
@@ -61,22 +54,15 @@ class App extends Component {
 
       ServerAPI.addPost(postToAdd)
         .then((newPost) => {
-          this.setState((prevState) => ({
-            post: removeItemFromArray(prevState.posts, newPost.id)
-              .concat([ newPost ]),
-          }));
+          this.props.addPost(newPost);
         });
-
+      window.location.href='/';
     }
-    // Avoid user going back to form because the form state will be invalid.
-    history.replace('/')
-    history.goBack();
   }
 
   state = {
     sortByValue: 'n',
     categories: [],
-    posts: [],
   };
 
   render() {
@@ -98,13 +84,12 @@ class App extends Component {
           .map((category, index) => (
           <div key={index}>
             <CategoryHeader
-              className="category-header"
               title={category.name}
               onSelect={onSortByClick}
               options={sortByOptions}
               defaultValue={this.state.sortByValue}
             />
-            {this.state.posts
+            {this.props.posts
               .filter((postItem) => (postItem.category === category.name))
               .sort((postA, postB) => {
                 switch (this.state.sortByValue) {
@@ -135,42 +120,56 @@ class App extends Component {
     );
 
     return (
-      <div>
-        <div className = "app-header">
-          <h1 className = "app-title">Readable</h1>
-          <h4>Read, post, comment and vote. Share your ideas to the world.</h4>
-        </div>
+      <BrowserRouter>
+        <div>
+          <div className = "app-header">
+            <h1 className = "app-title">Readable</h1>
+            <h4>Read, post, comment and vote. Share your ideas to the world.</h4>
+          </div>
 
-        <Route exact path="/" render={() => body('')}/>
-        <Route path="/category" render={({ location }) => (
-          body(getValue('title', location.search))
-        )}/>
-        <Route path="/post" render={({ location }) => (
-          <PostView
-            postId={getValue('id', location.search)}
-            onVote={this.onVote}
-            onDelete={this.onDeletePost}
-          />
-        )}/>
-        <Route path="/editpost" render={({ location }) => (
-          <PostForm
-            onSubmit={this.handleAddUpdatePost}
-            showTitle={true}
-            values={this.state.posts.find((post) => (
-              post.id === getValue('id', location.search)
-            ))}
-          />
-        )}/>
-        <Route path="/newpost" render={({ location }) => (
-          <PostForm
-            onSubmit={this.handleAddUpdatePost}
-            showTitle={true}
-            category={getValue('category', location.search)}
-          />
-        )}/>
-      </div>
+          <Route exact path="/" render={() => body('')}/>
+          <Route path="/category" render={({ location }) => (
+            body(getValue('title', location.search))
+          )}/>
+          <Route path="/post" render={({ location }) => (
+            <PostView postId={getValue('id', location.search)}/>
+          )}/>
+          <Route path="/editpost" render={({ location }) => (
+            <PostForm
+              onSubmit={this.handleAddUpdatePost}
+              showTitle={true}
+              values={this.props.posts.find((post) => (
+                post.id === getValue('id', location.search)
+              ))}
+            />
+          )}/>
+          <Route path="/newpost" render={({ location }) => (
+            <PostForm
+              onSubmit={this.handleAddUpdatePost}
+              showTitle={true}
+              category={getValue('category', location.search)}
+            />
+          )}/>
+        </div>
+      </BrowserRouter>
     );
   }
 }
 
-export default App;
+function mapStateToProps(storeState) {
+  return {
+    posts: storeState.posts
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    createPosts: (posts) => dispatch(createPosts({ posts })),
+    addPost: (post) => dispatch(addPost({ post })),
+    updatePost: (post) => dispatch(updatePost({ post })),
+    deletePost: (post) => dispatch(deletePost({ post })),
+    createComments: (comments) => dispatch(createComments({ comments })),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

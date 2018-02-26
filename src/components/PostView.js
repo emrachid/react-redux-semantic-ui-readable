@@ -1,69 +1,55 @@
 import React from 'react';
+import { Link } from 'react-router-dom'
 import CategoryItem from './CategoryItem';
 import PropTypes from 'prop-types'
 import { Container, Comment, Header, Icon } from 'semantic-ui-react'
-
+import { connect } from 'react-redux';
 import dateFromTime from '../utils/ConvertTimeToDate'
-import { removeItemFromArray } from '../utils/ArrayHelper.js'
 import PostForm from './PostForm'
-import history from '../utils/history'
 import * as ServerAPI from '../utils/ServerAPI'
+import {
+  addPost,
+  deletePost,
+  updatePost,
+  updateComment,
+  addComment,
+  deleteComment
+} from '../actions';
+
 
 class PostView extends React.Component {
   static propTypes = {
     postId: PropTypes.string.isRequired,
-    onVote: PropTypes.func.isRequired,
   };
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      postId: props.postId,
-    };
-  }
-
-  componentDidMount() {
-    this.updatePost();
-  	ServerAPI.getPostComments(this.state.postId).then((comments) => {
-  		this.setState({ comments });
+  onDeletePost = (id) => {
+    ServerAPI.deletePost(id).then((removedPost) => {
+      this.props.deletePost(removedPost);
     });
   }
 
-  updatePost = () => {
-    ServerAPI.getPost(this.state.postId).then((post) => {
-      this.setState({ post });
+  onVotePost = (id, isLike) => {
+    ServerAPI.votePost(id, isLike).then((newPost) => {
+      this.props.updatePost(newPost);
     });
-  }
-
-  updateComment = (comment) => {
-    this.setState((prevState) => ({
-      comments: removeItemFromArray(prevState.comments, comment.id)
-        .concat([ comment ])
-    }));
   }
 
   onVoteComment = (id, isLike) => {
     ServerAPI.voteComment(id, isLike).then((newComment) => {
-      this.updateComment(newComment);
+      this.props.updateComment(newComment);
     });
   }
 
   deleteComment = (id) => {
     ServerAPI.deleteComment(id).then((deletedComment) => {
       if (deletedComment.deleted) {
-        this.setState((prevState) => ({
-          comments: removeItemFromArray(prevState.comments, deletedComment.id),
-          post: {
-            ...prevState.post,
-            commentCount: (prevState.post.commentCount - 1),
-          }
-        }));
+        this.props.deleteComment(deletedComment);
       }
     });
   }
 
   editComment = (id) => {
-    const comment = this.state.comments.find((comment) => comment.id === id);
+    const comment = this.props.comments.find((comment) => comment.id === id);
     document.getElementById('formAuthor').value = comment.author;
     document.getElementById('formAuthor').setAttribute('disabled', null);
     document.getElementById('formBody').value = comment.body;
@@ -77,95 +63,83 @@ class PostView extends React.Component {
     if (values.formId) {
       ServerAPI.updateComment(values.formId, values.formBody)
         .then((newComment) => {
-          this.updateComment(newComment);
+          this.props.updateComment(newComment);
         });
     } else {
       const commentToAdd = {
         body: values.formBody,
         author: values.formAuthor,
-        parentId: this.state.post.id,
+        parentId: this.props.post.id,
       };
 
       ServerAPI.addPostComment(commentToAdd)
       .then((newComment) => {
-        this.setState((prevState) => ({
-          comments: removeItemFromArray(prevState.comments, newComment.id)
-            .concat([ newComment ]),
-          post: {
-            ...prevState.post,
-            commentCount: (prevState.post.commentCount + 1),
-          }
-        }));
+        this.props.addComment(newComment);
       });
 
     }
   }
 
-  state = {
-    comments: [],
-    post: {},
-    postId: '',
-  };
-
   render() {
-    const { onVote, onDelete } = this.props;
     return (
       <div>
         <Container>
 
-          {(this.state.post) && (
+          {(this.props.post) && (
             <CategoryItem
-              postItem={this.state.post}
+              postItem={this.props.post}
               onVote={(id, isLike) => {
-                onVote(id, isLike);
-                this.updatePost();
+                this.onVotePost(id, isLike);
               }}
               detailedView={true}
-              onDelete={onDelete}
+              onDelete={this.onDeletePost}
             />
           )}
 
-          <Comment.Group>
-            <Header as='h3' dividing>Comments</Header>
-            {(this.state.comments) && this.state.comments
-              .sort((a, b) => (b.timestamp - a.timestamp))
-              .map((comment, index) => (
-              <Comment key={index}>
-                <Comment.Avatar src={require('../icons/avatar.svg')} />
-                <Comment.Content>
-                  <Comment.Author>{comment.author}</Comment.Author>
-                  <Comment.Metadata>
-                    <div>{dateFromTime(comment.timestamp)}</div>
-                  </Comment.Metadata>
-                  <Comment.Text>{comment.body}</Comment.Text>
-                  <Comment.Actions>
-                    <Comment.Action
-                      onClick={() => this.editComment(comment.id)}>
-                      Edit
-                    </Comment.Action>
-                    <Comment.Action
-                      onClick={() => this.deleteComment(comment.id)}>
-                      Delete
-                    </Comment.Action>
-                    <span className="category-votes">Votes {comment.voteScore}</span>
-                    <Icon name="thumbs up"
-                      link
-                      onClick={() => this.onVoteComment(comment.id, true)}/>
-                    <Icon name="thumbs down"
-                      link
-                      onClick={() => this.onVoteComment(comment.id, false)}
-                      flipped={'horizontally'}/>
-                  </Comment.Actions>
-                </Comment.Content>
-              </Comment>
-            ))}
+          {(this.props.post) && (
+            <Comment.Group>
+              <Header as='h3' dividing>Comments</Header>
+              {(this.props.comments) &&
+                this.props.comments.sort((a, b) => (b.timestamp - a.timestamp))
+                .map((comment, index) => (
+                  <Comment key={index}>
+                    <Comment.Avatar src={require('../icons/avatar.svg')} />
+                    <Comment.Content>
+                      <Comment.Author>{comment.author}</Comment.Author>
+                      <Comment.Metadata>
+                        <div>{dateFromTime(comment.timestamp)}</div>
+                      </Comment.Metadata>
+                      <Comment.Text>{comment.body}</Comment.Text>
+                      <Comment.Actions>
+                        <Comment.Action
+                          onClick={() => this.editComment(comment.id)}>
+                          Edit
+                        </Comment.Action>
+                        <Comment.Action
+                          onClick={() => this.deleteComment(comment.id)}>
+                          Delete
+                        </Comment.Action>
+                        <span className="category-votes">Votes {comment.voteScore}</span>
+                        <Icon name="thumbs up"
+                          link
+                          onClick={() => this.onVoteComment(comment.id, true)}/>
+                        <Icon name="thumbs down"
+                          link
+                          onClick={() => this.onVoteComment(comment.id, false)}
+                          flipped={'horizontally'}/>
+                      </Comment.Actions>
+                    </Comment.Content>
+                  </Comment>
+              ))}
+              <PostForm onSubmit={this.handleSubmit} />
+            </Comment.Group>
+          )}
 
-            <PostForm onSubmit={this.handleSubmit} />
+          {(!this.props.post) && (
+            <Header as='h4'>Invalid post data. Have post been deleted?</Header>
+          )}
 
-          </Comment.Group>
-
-          <a href="" onClick={(e) => {e.preventDefault(); history.goBack()}}>
-            <Icon name="angle left"/> back</a>
+          <Link to="/"><Icon name="angle left"/> back</Link>
 
         </Container>
 
@@ -174,4 +148,24 @@ class PostView extends React.Component {
   }
 }
 
-export default PostView;
+function mapStateToProps(storeState, ownProps) {
+  return {
+    post: storeState.posts.filter((post) => (post.id === ownProps.postId))[0],
+    comments: storeState.comments.filter((comment) => (
+      comment.parentId === ownProps.postId
+    )),
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    addPost: (post) => dispatch(addPost({ post })),
+    updatePost: (post) => dispatch(updatePost({ post })),
+    deletePost: (post) => dispatch(deletePost({ post })),
+    updateComment: (comment) => dispatch(updateComment({ comment })),
+    deleteComment: (comment) => dispatch(deleteComment({ comment })),
+    addComment: (comment) => dispatch(addComment({ comment })),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PostView);

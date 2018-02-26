@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Icon, Grid, Divider, Item } from 'semantic-ui-react'
 import dateFromTime from '../utils/ConvertTimeToDate'
-import history from '../utils/history'
 
 const CategoryItem = ({ postItem, onVote, detailedView, onDelete }) => (
   <div>
@@ -42,11 +41,7 @@ const CategoryItem = ({ postItem, onVote, detailedView, onDelete }) => (
                       search: ('?id=' + postItem.id)
                     }}><Icon name="edit"/> Edit </Link>
                     |
-                    <a href="/" onClick={(e) => {
-                      onDelete(postItem.id);
-                      // Prevent user going back to a deleted post
-                      history.replace('/');
-                    }}> Delete</a>
+                    <Link to="/" onClick={() => onDelete(postItem.id)}> Delete</Link>
                   </div>
                 ):(
                   <Link to={{
