@@ -10,12 +10,11 @@ const CategoryHeader = ({ title, onSelect, options, defaultValue }) => (
     <Grid stackable columns={3}>
        <Grid.Column width={2}>
          <Link to={{
-           pathname: '/category',
-           search: ('?title=' + title)
+           pathname: '/' + title
          }}><h2 className="category-header">{title}</h2></Link>
        </Grid.Column>
        <Grid.Column width={3}>
-         <Link to={'/newpost?category=' + title}>
+         <Link to={'/' + title + '/post/add'}>
            Add new post
          </Link>
        </Grid.Column>

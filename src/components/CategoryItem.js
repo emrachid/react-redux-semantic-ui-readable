@@ -37,17 +37,23 @@ const CategoryItem = ({ postItem, onVote, detailedView, onDelete }) => (
                 {detailedView ? (
                   <div>
                     <Link to={{
-                      pathname: '/editpost',
-                      search: ('?id=' + postItem.id)
+                      pathname: '/' + postItem.category + '/' + postItem.id + '/editpost'
                     }}><Icon name="edit"/> Edit </Link>
                     |
                     <Link to="/" onClick={() => onDelete(postItem.id)}> Delete</Link>
                   </div>
                 ):(
-                  <Link to={{
-                    pathname: '/post',
-                    search: ('?id=' + postItem.id)
-                  }}><Icon name="talk"/> View <Icon name="angle right"/></Link>
+                  <div>
+                    <Link to={{
+                      pathname: '/' + postItem.category + '/' + postItem.id + '/editpost'
+                    }}><Icon name="edit"/> Edit </Link>
+                    |
+                    <Link to="/" onClick={() => onDelete(postItem.id)}> Delete </Link>
+                    |
+                    <Link to={{
+                      pathname: '/' + postItem.category + '/' + postItem.id
+                    }}><Icon name="talk"/> View <Icon name="angle right"/></Link>
+                  </div>
                 )}
               </Grid.Column>
             </Grid>

@@ -34,6 +34,12 @@ class App extends Component {
     });
   }
 
+  onDeletePost = (id) => {
+    ServerAPI.deletePost(id).then((removedPost) => {
+      this.props.deletePost(removedPost);
+    });
+  }
+
   handleAddUpdatePost = (values, category) => {
     /* if form id is not empty, it is an update command.
      * Otherwise, it is an add command.
@@ -43,7 +49,7 @@ class App extends Component {
         .then((newPost) => {
           this.props.updatePost(newPost);
         });
-      window.location.href='/post?id=' + values.formId;
+      window.location.href='/' + category + '/' + values.formId;
     } else {
       const postToAdd = {
         body: values.formBody,
@@ -105,18 +111,13 @@ class App extends Component {
                   key={index}
                   postItem={postItem}
                   onVote={this.onVote}
+                  onDelete={this.onDeletePost}
                 />
             ))}
           </div>
         ))}
         {(filterByTitle) && (<Link to={'/'}><Icon name="angle left"/> back</Link>)}
       </Container>
-    );
-
-    const getValue = (key, query) => (
-      // Check whether query is valid. If so, get value from query.
-      (query.indexOf(`?${key}=`) === 0) ?
-        query.slice(`?${key}=`.length) : ''
     );
 
     return (
@@ -128,26 +129,25 @@ class App extends Component {
           </div>
 
           <Route exact path="/" render={() => body('')}/>
-          <Route path="/category" render={({ location }) => (
-            body(getValue('title', location.search))
+          <Route exact path="/:category" render={({ location }) => (
+            body(location.pathname.slice(1))
           )}/>
-          <Route path="/post" render={({ location }) => (
-            <PostView postId={getValue('id', location.search)}/>
-          )}/>
-          <Route path="/editpost" render={({ location }) => (
+          <Route exact path="/:category/:post_id" component={PostView}/>
+          <Route exact path="/:category/:post_id/editpost" render={({ location }) => (
             <PostForm
               onSubmit={this.handleAddUpdatePost}
               showTitle={true}
               values={this.props.posts.find((post) => (
-                post.id === getValue('id', location.search)
+                post.id === location.pathname.split('/')[2]
               ))}
+              category={location.pathname.split('/')[1]}
             />
           )}/>
-          <Route path="/newpost" render={({ location }) => (
+          <Route exact path="/:category/post/add" render={({ location }) => (
             <PostForm
               onSubmit={this.handleAddUpdatePost}
               showTitle={true}
-              category={getValue('category', location.search)}
+              category={location.pathname.split('/')[1]}
             />
           )}/>
         </div>

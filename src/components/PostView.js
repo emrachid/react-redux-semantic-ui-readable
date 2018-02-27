@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom'
 import CategoryItem from './CategoryItem';
-import PropTypes from 'prop-types'
 import { Container, Comment, Header, Icon } from 'semantic-ui-react'
 import { connect } from 'react-redux';
 import dateFromTime from '../utils/ConvertTimeToDate'
@@ -18,10 +17,6 @@ import {
 
 
 class PostView extends React.Component {
-  static propTypes = {
-    postId: PropTypes.string.isRequired,
-  };
-
   onDeletePost = (id) => {
     ServerAPI.deletePost(id).then((removedPost) => {
       this.props.deletePost(removedPost);
@@ -76,7 +71,6 @@ class PostView extends React.Component {
       .then((newComment) => {
         this.props.addComment(newComment);
       });
-
     }
   }
 
@@ -131,12 +125,12 @@ class PostView extends React.Component {
                     </Comment.Content>
                   </Comment>
               ))}
-              <PostForm onSubmit={this.handleSubmit} />
+              <PostForm onSubmit={this.handleSubmit} category={this.props.post.category}/>
             </Comment.Group>
           )}
 
           {(!this.props.post) && (
-            <Header as='h4'>Invalid post data. Have post been deleted?</Header>
+            <Header as='h4'>Error: 404 Page not found</Header>
           )}
 
           <Link to="/"><Icon name="angle left"/> back</Link>
@@ -150,9 +144,9 @@ class PostView extends React.Component {
 
 function mapStateToProps(storeState, ownProps) {
   return {
-    post: storeState.posts.filter((post) => (post.id === ownProps.postId))[0],
+    post: storeState.posts.filter((post) => (post.id === ownProps.match.params.post_id))[0],
     comments: storeState.comments.filter((comment) => (
-      comment.parentId === ownProps.postId
+      comment.parentId === ownProps.match.params.post_id
     )),
   };
 }

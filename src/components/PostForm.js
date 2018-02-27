@@ -52,15 +52,7 @@ class PostForm extends React.Component {
             required={true}
             defaultValue={(values) && values.body}/>
           <Button content='Submit' primary/>
-          {(values) ? (
-            <Button
-              content='Back'
-              primary
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.href='/post?id=' + values.id;
-              }}/>
-          ): (
+          {!(values) && (
             <Button
               content='Reset'
               primary
