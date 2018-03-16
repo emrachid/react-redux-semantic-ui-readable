@@ -2,11 +2,11 @@
 
 This is the project for the assessment Udacity's React/Redux course. This is a content and comment web app. Users is able to post content to predefined categories, comment on their posts and other users' posts, and vote on posts and comments. Users can edit and delete posts and comments.
 
-Why this project?
+### Why this project?
 
 This content and comment structure is common across a large number of websites and applications, from news sites to blogs to aggregators like Hacker News and Reddit. This project allowed me to gain an understanding of how Redux can function in a standard type of application.
 
-Specification
+### Specification
 
 This project uses a local backend server. The server is built in Node, but it is very simple. This app will talk to the server using documented API endpoints. The server's endpoints is used to manage storing, reading, updating, and deleting data for this application. Using this server, a React/Redux frontend for the application was created.
 
@@ -62,3 +62,8 @@ The server is built in Node. Follow this steps to run the server on your local m
 This repository is for React Udacity course. Therefore, pull requests are not allowed.
 
 For details, check out [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+The contents of this repository are covered under the [MIT License](LICENSE).
+
