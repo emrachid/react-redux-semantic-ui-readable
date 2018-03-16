@@ -1,6 +1,6 @@
 import React from 'react';
-import { Form, Button, Container } from 'semantic-ui-react'
-import serializeForm from 'form-serialize'
+import { Form, Button, Container } from 'semantic-ui-react';
+import serializeForm from 'form-serialize';
 
 const resetForm = () => {
   document.getElementById('formTitle').value = '';
@@ -11,6 +11,7 @@ const resetForm = () => {
 }
 
 const handleSubmit = (event, onSubmit, category) => {
+  event.preventDefault();
   const values = serializeForm(event.target, { hash: true });
   onSubmit(values, category);
   resetForm();
@@ -23,6 +24,12 @@ class PostForm extends React.Component {
 
     return (
       <Container>
+        {(showTitle) && (values) && (
+          <h2>Edit Post</h2>
+        )}
+        {(showTitle) && (!values) && (
+          <h2>Add Post</h2>
+        )}
         <Form id='formComment' reply onSubmit={(e) => handleSubmit(e, onSubmit, category)}>
           <Form.Input
             type='hidden'

@@ -1,8 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom'
-import { Icon, Grid, Divider, Item } from 'semantic-ui-react'
-import dateFromTime from '../utils/ConvertTimeToDate'
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
+import { Icon, Grid, Divider, Item } from 'semantic-ui-react';
+import dateFromTime from '../utils/ConvertTimeToDate';
 
 const CategoryItem = ({ postItem, onVote, detailedView, onDelete }) => (
   <div>
@@ -34,27 +34,11 @@ const CategoryItem = ({ postItem, onVote, detailedView, onDelete }) => (
                 <Icon name="comments"/> Comments {postItem.commentCount}
               </Grid.Column>
               <Grid.Column>
-                {detailedView ? (
-                  <div>
-                    <Link to={{
-                      pathname: '/' + postItem.category + '/' + postItem.id + '/editpost'
-                    }}><Icon name="edit"/> Edit </Link>
-                    |
-                    <Link to="/" onClick={() => onDelete(postItem.id)}> Delete</Link>
-                  </div>
-                ):(
-                  <div>
-                    <Link to={{
-                      pathname: '/' + postItem.category + '/' + postItem.id + '/editpost'
-                    }}><Icon name="edit"/> Edit </Link>
-                    |
-                    <Link to="/" onClick={() => onDelete(postItem.id)}> Delete </Link>
-                    |
-                    <Link to={{
-                      pathname: '/' + postItem.category + '/' + postItem.id
-                    }}><Icon name="talk"/> View <Icon name="angle right"/></Link>
-                  </div>
-                )}
+                <Commands
+                  postId={postItem.id}
+                  postCategory={postItem.category}
+                  detailedView={detailedView}
+                  onDelete={onDelete} />
               </Grid.Column>
             </Grid>
           </Item.Extra>
@@ -62,6 +46,24 @@ const CategoryItem = ({ postItem, onVote, detailedView, onDelete }) => (
       </Item>
     </Item.Group>
     <Divider/>
+  </div>
+);
+
+const Commands = ({postId, postCategory, detailedView, onDelete}) => (
+  <div>
+    <Link to={{
+      pathname: '/' + postCategory + '/' + postId + '/editpost'
+    }}><Icon name="edit"/> Edit </Link>
+    |
+    <Link to="/" onClick={() => onDelete(postId)}> Delete </Link>
+    {detailedView || (
+      <span>
+        {'| '}
+        <Link to={{
+          pathname: '/' + postCategory + '/' + postId
+        }}><Icon name="talk"/> View <Icon name="angle right"/></Link>
+      </span>
+    )}
   </div>
 );
 

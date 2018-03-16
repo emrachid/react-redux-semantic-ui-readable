@@ -1,20 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom'
-import CategoryItem from './CategoryItem';
-import { Container, Comment, Header, Icon } from 'semantic-ui-react'
+import { withRouter } from 'react-router-dom';
+import CategoryItem from '../components/CategoryItem';
+import { Container, Comment, Header, Icon } from 'semantic-ui-react';
 import { connect } from 'react-redux';
-import dateFromTime from '../utils/ConvertTimeToDate'
-import PostForm from './PostForm'
-import * as ServerAPI from '../utils/ServerAPI'
-import {
-  addPost,
-  deletePost,
-  updatePost,
-  updateComment,
-  addComment,
-  deleteComment
-} from '../actions';
-
+import dateFromTime from '../utils/ConvertTimeToDate';
+import PostForm from '../containers/PostForm';
+import * as CommentActions from '../actions/comment';
+import * as PostActions from '../actions/post';
+import * as ServerAPI from '../utils/ServerAPI';
 
 class PostView extends React.Component {
   onDeletePost = (id) => {
@@ -133,7 +126,11 @@ class PostView extends React.Component {
             <Header as='h4'>Error: 404 Page not found</Header>
           )}
 
-          <Link to="/"><Icon name="angle left"/> back</Link>
+          <a
+            href=""
+            onClick={(e) => {e.preventDefault(); this.props.history.goBack();}}>
+            <Icon name="angle left"/> back
+          </a>
 
         </Container>
 
@@ -144,22 +141,13 @@ class PostView extends React.Component {
 
 function mapStateToProps(storeState, ownProps) {
   return {
-    post: storeState.posts.filter((post) => (post.id === ownProps.match.params.post_id))[0],
+    post: storeState.posts.filter((post) => (post.id === ownProps.postId))[0],
     comments: storeState.comments.filter((comment) => (
-      comment.parentId === ownProps.match.params.post_id
+      comment.parentId === ownProps.postId
     )),
   };
 }
 
-function mapDispatchToProps(dispatch) {
-  return {
-    addPost: (post) => dispatch(addPost({ post })),
-    updatePost: (post) => dispatch(updatePost({ post })),
-    deletePost: (post) => dispatch(deletePost({ post })),
-    updateComment: (comment) => dispatch(updateComment({ comment })),
-    deleteComment: (comment) => dispatch(deleteComment({ comment })),
-    addComment: (comment) => dispatch(addComment({ comment })),
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(PostView);
+export default withRouter(
+  connect(mapStateToProps, { ...PostActions, ...CommentActions })(PostView)
+);

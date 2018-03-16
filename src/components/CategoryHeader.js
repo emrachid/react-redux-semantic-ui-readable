@@ -1,12 +1,11 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom'
-import { Grid, Dropdown, Divider } from 'semantic-ui-react'
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
+import { Grid, Dropdown, Divider } from 'semantic-ui-react';
 import '../App.css';
 
 const CategoryHeader = ({ title, onSelect, options, defaultValue }) => (
   <div>
-    <Divider hidden section/>
     <Grid stackable columns={3}>
        <Grid.Column width={2}>
          <Link to={{
